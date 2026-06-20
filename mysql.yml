@@ -26,20 +26,14 @@
       ignore_errors: yes
 
     - name: create root user for remote connection
-      community.mysql.mysql_user:
-        name: root
-        host: "%"
-        password: "Manoj@123"
-        plugin: caching_sha2_password
-        priv: "*.*:ALL,GRANT"
-        state: present 
-        login_unix_socket: /var/run/mysqld/mysqld.sock
-
+      shell: |
+        mysql -e "CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY 'Manoj@123';
+        GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;"
+      ignore_errors: yes
 
     - name: Flush privileges
-      community.mysql.mysql_query:
-        query: FLUSH PRIVILEGES;
-        login_unix_socket: /var/run/mysqld/mysqld.sock
+      shell: mysql -e "FLUSH PRIVILEGES;"
+      
 
     - name: Allowing remote connections
       replace:
