@@ -73,8 +73,8 @@
     - name: load schema
       community.mysql.mysql_db:
         login_host: mysql.manojkoney.store
-        login_user: expense
-        login_password: "ExpenseApp@1"
+        login_user: root
+        login_password: "Manoj@123"
         name: all
         state: import
         target: /app/schema/backend.sql
