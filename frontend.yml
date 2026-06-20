@@ -49,7 +49,7 @@
 
     - name: removing default nginx config
       file:
-        src: /etc/nginx/sites-available/default
+        path: /etc/nginx/sites-available/default
         state: absent
 
     - name: creating new default nginx config
