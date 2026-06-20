@@ -30,6 +30,7 @@
         name: root
         host: "%"
         password: "Manoj@123"
+        plugin: caching_sha2_password
         priv: "*.*:ALL,GRANT"
         state: present 
         login_unix_socket: /var/run/mysqld/mysqld.sock
