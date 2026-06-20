@@ -1,0 +1,103 @@
+- name: setup backend configuration
+  hosts: backend
+  become: yes
+  tasks:
+    - name: update cache
+      apt:
+        update_cache: yes
+
+    - name: Install mysql client, unzip
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - mysql-client
+        - unzip
+        - python3-pymysql
+
+    - name: Download nodejs script
+      get_url:
+        url: https://deb.nodesource.com/setup_20.x
+        dest: /tmp/nodesource_setup.sh
+        mode: '0755'
+
+    - name: Execute nodejs script
+      shell: bash /tmp/nodesource_setup.sh
+      args:
+        executable: /bin/bash
+
+    - name: Install nodejs
+      package: 
+        name: nodejs
+        state: present
+
+    - name: Create system user roboshop to run application
+      ansible.builtin.user:
+        name: expense
+        home: /app
+        shell: /sbin/nologin
+        system: true
+        comment: roboshop system user
+
+    - name: remove directory if it exists
+      file:
+        path: /app
+        state: absent
+
+    - name: removing zip file if it exists
+      file:
+        path: /tmp/backend.tar.gz
+        state: absent
+
+    - name: create directory
+      file:
+        path: /app
+        state: present
+
+    - name: Download zip code
+      get_url:
+        url: https://raw.githubusercontent.com/daws-90s/expense-documentation/refs/heads/main/artifacts/expense-backend-v3.tar.gz
+        dest: /tmp/backend.tar.gz
+
+    - name: Extract files
+      unarchive:  
+        src: /tmp/backend.tar.gz
+        dest: /app
+        remote_src: yes
+
+    - name: install node dependencies
+      community.general.npm:
+        path: /app
+        state: present
+
+    - name: copy backend service
+      template:
+        src: backend.service.j2
+        dest: /etc/systemd/system/backend.service
+
+    - name: start end enable service
+      service:
+        name: backend
+        state: started
+        enabled: yes
+
+    - name: load schema
+      community.mysql.mysql_db:
+        login_host: mysql.manojkoney.store
+        login_user: expense
+        login_password: "ExpenseApp@1"
+        name: all
+        state: import
+        target: /app/schema/backend.sql
+
+    - name: deamon reload
+      systemd:
+        name: backend
+        daemon_reload: true
+
+    - name: restart backend
+      service:
+        name: backend
+        state: restarted
+      
+    

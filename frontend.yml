@@ -1,0 +1,64 @@
+- name: setup frontend configuration
+  hosts: frontend
+  become: yes
+  tasks:
+    - name: update cache
+      apt:
+        update_cache: yes
+    
+    - name: Install nginx, 
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - nginx
+        - unzip
+       
+    - name: enable and start nginx
+      apt:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: remove directory if it exists
+      file:
+        path: /var/www/html
+        state: absent
+
+    - name: remove zip code if exists
+      file: 
+        path: /tmp/frontend.tar.gz
+        state: absent
+    
+    - name: create directory
+      file:
+        path: /var/www/html
+        state: present
+    
+    - name: Download code
+      get_url:
+        url: https://raw.githubusercontent.com/daws-90s/expense-documentation/refs/heads/main/artifacts/expense-frontend-v3.tar.gz
+        dest: /tmp/frontend.tar.gz
+
+    - name: Extract the files
+      unarchive:
+        src: /tmp/frontend.tar.gz
+        dest: /var/www/html
+        remote_src: yes
+
+
+    - name: removing default nginx config
+      file:
+        src: /etc/nginx/sites-available/default
+        state: absent
+
+    - name: creating new default nginx config
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
+
+    - name: restart and enable frontend
+      service:
+        name: nginx
+        state: restarted
+        enabled: yes
