@@ -33,7 +33,7 @@
     - name: create directory
       file:
         path: /var/www/html
-        state: present
+        state: directory
     
     - name: Download code
       get_url:
