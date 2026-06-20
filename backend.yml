@@ -70,6 +70,15 @@
         path: /app
         state: present
 
+    - name: load schema
+      community.mysql.mysql_db:
+        login_host: mysql.manojkoney.store
+        login_user: expense
+        login_password: "ExpenseApp@1"
+        name: all
+        state: import
+        target: /app/schema/backend.sql
+
     - name: copy backend service
       template:
         src: backend.service.j2
@@ -80,15 +89,6 @@
         name: backend
         state: started
         enabled: yes
-
-    - name: load schema
-      community.mysql.mysql_db:
-        login_host: mysql.manojkoney.store
-        login_user: expense
-        login_password: "ExpenseApp@1"
-        name: all
-        state: import
-        target: /app/schema/backend.sql
 
     - name: deamon reload
       systemd:
