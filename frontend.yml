@@ -15,7 +15,7 @@
         - unzip
        
     - name: enable and start nginx
-      apt:
+      service:
         name: nginx
         state: started
         enabled: yes
